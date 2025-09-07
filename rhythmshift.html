@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>あなたのリズムシフトを知る</title>
+  <style>
+    body {
+      font-family: "Noto Sans JP", Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #ffe4ef; /* 薄いピンク */
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .container {
+      background: none;
+      padding: 0;
+      border-radius: 0;
+      box-shadow: none;
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    h2 {
+      color: #333;
+      margin-bottom: 32px;
+      font-size: 2rem;
+      font-weight: 700;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.06);
+      text-align: center;
+    }
+    .input-group {
+      display: flex;
+      gap: 32px;
+      margin-bottom: 36px;
+      justify-content: center;
+      align-items: center;
+    }
+    .input-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-weight: 500;
+      color: #555;
+      font-size: 1.1em;
+      min-width: 110px;
+    }
+    .input-label span {
+      margin-bottom: 8px;
+      font-size: 1.1em;
+      font-weight: 600;
+      color: #333;
+    }
+    select {
+      padding: 18px 23px;
+      border: 2px solid #e0b3cc;
+      border-radius: 14px;
+      font-size: 1.25em;
+      background: #fff;
+      color: #333;
+      cursor: pointer;
+      box-shadow: 0 2px 14px rgba(200,130,170,0.10);
+      transition: border 0.3s;
+      min-width: 110px;
+      text-align: center;
+      font-family: inherit;
+    }
+    select:focus {
+      outline: none;
+      border-color: #f093fb;
+      box-shadow: 0 0 0 3px rgba(240,147,251,0.12);
+    }
+    select:hover {
+      border-color: #f5576c;
+    }
+    button {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      border: none;
+      padding: 22px 60px;
+      font-size: 1.5em;
+      font-weight: 700;
+      border-radius: 60px;
+      cursor: pointer;
+      margin: 30px 0;
+      transition: all 0.2s;
+      box-shadow: 0 6px 16px rgba(245,87,108,0.10);
+      letter-spacing: 1px;
+    }
+    button:hover {
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 10px 30px rgba(245,87,108,0.18);
+    }
+    button:active {
+      transform: translateY(0) scale(1.01);
+    }
+    #result {
+      margin-top: 20px;
+      padding: 32px 24px;
+      background: #fff;
+      color: #222;
+      border-radius: 18px;
+      font-size: 1.3em;
+      font-weight: 600;
+      min-height: 80px;
+      box-shadow: 0 2px 15px rgba(200,130,170,0.15);
+      text-shadow: none;
+      text-align: center;
+      border: 2px solid #f093fb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      letter-spacing: 1px;
+    }
+    #result.empty {
+      background: #fff;
+      color: #999;
+      box-shadow: none;
+      border: 2px dashed #e0b3cc;
+      min-height: 50px;
+    }
+    #result.empty::after {
+      content: "日付を選択して「あなたのリズムシフトを知る」ボタンを押してください";
+      font-size: 1em;
+      font-weight: normal;
+      color: #888;
+      margin-top: 0;
+    }
+    @media (max-width: 600px) {
+      .container {
+        max-width: 95vw;
+      }
+      .input-group {
+        gap: 15px;
+        flex-direction: column;
+      }
+      select {
+        min-width: 90px;
+        font-size: 1em;
+        padding: 14px 12px;
+      }
+      button {
+        font-size: 1.15em;
+        padding: 14px 30px;
+      }
+      #result {
+        font-size: 1.1em;
+        padding: 22px 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>あなたのリズムシフトを知る</h2>
+    <div class="input-group">
+      <label class="input-label">
+        <span>年</span>
+        <select id="year"></select>
+      </label>
+      <label class="input-label">
+        <span>月</span>
+        <select id="month"></select>
+      </label>
+      <label class="input-label">
+        <span>日</span>
+        <select id="day"></select>
+      </label>
+    </div>
+    <button onclick="showRitsuShift()">あなたのリズムシフトを知る</button>
+    <div id="result" class="empty"></div>
+  </div>
+  <script>
+    // 年月日プルダウン生成
+    const yearSelect = document.getElementById("year");
+    const monthSelect = document.getElementById("month");
+    const daySelect = document.getElementById("day");
+    for (let y = 1900; y <= 2030; y++) {
+      yearSelect.innerHTML += `<option value="${y}">${y}年</option>`;
+    }
+    for (let m = 1; m <= 12; m++) {
+      monthSelect.innerHTML += `<option value="${m}">${m}月</option>`;
+    }
+    for (let d = 1; d <= 31; d++) {
+      daySelect.innerHTML += `<option value="${d}">${d}日</option>`;
+    }
+
+    const kan = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+    const shi = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+    const eto60 = Array.from({ length: 60 }, (_, i) => kan[i % 10] + shi[i % 12]);
+    const baseDate = new Date('1899-12-21');
+    const baseIndex = 59;
+
+    const tenchusatsuTypes = [
+      { name: "戌亥天中殺", eto: ["甲子","乙丑","丙寅","丁卯","戊辰","己巳","庚午","辛未","壬申","癸酉"], shift: "エクリプス" },
+      { name: "申酉天中殺", eto: ["甲戌","乙亥","丙子","丁丑","戊寅","己卯","庚辰","辛巳","壬午","癸未"], shift: "ヴィジョン" },
+      { name: "午未天中殺", eto: ["甲申","乙酉","丙戌","丁亥","戊子","己丑","庚寅","辛卯","壬辰","癸巳"], shift: "バランス" },
+      { name: "辰巳天中殺", eto: ["甲午","乙未","丙申","丁酉","戊戌","己亥","庚子","辛丑","壬寅","癸卯"], shift: "レボルト" },
+      { name: "寅卯天中殺", eto: ["甲辰","乙巳","丙午","丁未","戊申","己酉","庚戌","辛亥","壬子","癸丑"], shift: "インパルス" },
+      { name: "子丑天中殺", eto: ["甲寅","乙卯","丙辰","丁巳","戊午","己未","庚申","辛酉","壬戌","癸亥"], shift: "サイレント" }
+    ];
+
+    function getRitsuShift(eto) {
+      for (const type of tenchusatsuTypes) {
+        if (type.eto.includes(eto)) {
+          return type.shift;
+        }
+      }
+      return null;
+    }
+
+    function showRitsuShift() {
+      const y = yearSelect.value;
+      const m = monthSelect.value.padStart(2, '0');
+      const d = daySelect.value.padStart(2, '0');
+      const birthDate = new Date(`${y}-${m}-${d}`);
+      const deltaDays = Math.floor((birthDate - baseDate) / (1000 * 60 * 60 * 24));
+      const index = (baseIndex + deltaDays) % 60;
+      const eto = eto60[index < 0 ? (index + 60) : index];
+      const ritsuShift = getRitsuShift(eto);
+
+      let resultText = "";
+      if (ritsuShift) {
+        resultText = `あなたのリズムシフトは「${ritsuShift}シフト」です。`;
+      } else {
+        resultText = `あなたのリズムシフトはありません。`;
+      }
+      const resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = resultText;
+      resultDiv.classList.remove("empty");
+    }
+
+    // デフォルト値を設定（今日の日付）
+    const today = new Date();
+    yearSelect.value = today.getFullYear();
+    monthSelect.value = today.getMonth() + 1;
+    daySelect.value = today.getDate();
+  </script>
+</body>
+</html>
